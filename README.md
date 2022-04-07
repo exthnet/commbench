@@ -106,35 +106,34 @@ cpu, cuda, ca, ncclを1まとめにしたステップジョブとして実行さ
 実行が終わると
 log_1n4p_mpi_reduce.txt
 のようなログファイルがそれぞれ作られる。
-$ ../job_openmp_base/analyze_{1p,2p,4p}.sh
-を実行すると、ログファイルを元に結果部分だけ抽出したcsvファイルが作られる。
-さらに、
-1ノード実行の結果一覧 log_1n{2p,4p}_all.csv
-や
-2ノード実行の結果一覧 log_2n{1p,2p,4p}_all.csv
-も生成される。
-これらをExcelで開けばグラフの作成に便利。
+
+ルートディレクトリにおいてあるanalyze_1.shとanalyze_2.shを順番に実行すれば
+結果のグラフ化まで行ってくれるようにしてある。
+実行時にはスクリプト内のディレクトリ名を編集しておく必要がある。
+（_1p,_2p,_4pは付けなくて良い。冒頭の例でいうならworkdir。）
+analyze_1.shは下記のanalyze_{1p,2p,4p}.shによって画像を生成するスクリプト、
+analyze_2.shはグラフをまとめるスクリプト。
+
+内部では
+$ ../flow_type2_base/analyze_{1p,2p,4p}.sh
+を実行し、ログファイルを元に結果部分だけ抽出したcsvファイルを作成、
+そのデータを元にgnuplotで画像を生成している。
+*_all.png はreduce, allreduce, reducescatter, allgather, broadcast の各グラフが統合されたもの。
+*_all2.png はさらにlatencyも統合されたもの。
+latencyは2プロセス実行の場合しか測定されないため、*_all2.pngが生成されるのも該当する場合のみ。
+
+1ノード実行の結果一覧 log_1n{2p,4p}_all.csv　や
+2ノード実行の結果一覧 log_2n{1p,2p,4p}_all.csv　も生成される。
+Excelで開けばグラフの作成に便利かもしれない。
 なおallgather, broadcast, latencyだけCHAR型通信のため1byteから、
-それ以外はFLOAT型のため4byteから始まることに注意。
+それ以外はFLOAT型のため4byteから始まることに注意が必要。
 
 引数に1,2,4のいずれかを与えるとそのノード数のもののみが解析される。
 例 $ ../flow_type2_base/analyze_1p.sh
 例 $ ../flow_type2_base/analyze_2p.sh 2
 
-さらにgnuplotでpng形式のグラフも生成するようにした。
-*_all.png はreduce, allreduce, reducescatter, allgather, broadcast の各グラフが統合されたもの。
-*_all2.png はさらにlatencyも統合されたもの。
-latencyは2プロセス実行の場合しか測定されないため、*_all2.pngが生成されるのも該当する場合のみ。
 
-
-8. グラフの取りまとめ
-analyze1.sh と analyze2.sh でグラフをまとめられるようにした。
-スクリプト内のディレクトリ名を編集して実行する。
-
-
-
-
-OpenACC版の測定について
+A. OpenACC版の測定について
 build_acc.sh を使うとACC版のビルドができる。
 スクリプト生成は generate_acc_?p.sh
 実行は bench_acc_?p.sh
